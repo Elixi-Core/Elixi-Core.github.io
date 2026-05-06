@@ -65,6 +65,7 @@ function init() {
   const dialogTitle  = document.getElementById('dialog-title');
   const dialogBody   = document.getElementById('dialog-body');
   const dialogClose  = dialog?.querySelector('.dialog-close');
+  const dialogBack   = dialog?.querySelector('.dialog-back');
   const isTouchDevice= window.matchMedia('(pointer: coarse)').matches;
   const reducedMotion= window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isSmall      = window.matchMedia('(max-width: 768px)').matches;
@@ -96,8 +97,16 @@ function init() {
   scene.background = new THREE.Color(0x05070b);
   scene.fog = new THREE.Fog(0x05070b, 8, 16);
 
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 80);
-  camera.position.set(0, 1.7, 4.5);
+  // FOV + initial camera distance scale with viewport aspect so the back wall
+  // of monitors is fully visible on portrait phones (where the 16:9 default
+  // would only show 1–2 monitors at a time).
+  const aspect = window.innerWidth / window.innerHeight;
+  let camFov = 55, camZ = 4.5, maxDist = 6.5;
+  if (aspect < 1.0) { camFov = 70; camZ = 7.2; maxDist = 9.0; }       // tall (portrait phone)
+  else if (aspect < 1.35) { camFov = 62; camZ = 5.8; maxDist = 7.5; } // square-ish (tablet portrait, narrow window)
+
+  const camera = new THREE.PerspectiveCamera(camFov, aspect, 0.1, 80);
+  camera.position.set(0, 1.7, camZ);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 1.6, 0);
@@ -105,7 +114,7 @@ function init() {
   controls.dampingFactor = 0.08;
   controls.enablePan = false;
   controls.minDistance = 2.4;
-  controls.maxDistance = 6.5;
+  controls.maxDistance = maxDist;
   controls.minPolarAngle = Math.PI / 3.4;
   controls.maxPolarAngle = Math.PI / 2.05;
   controls.rotateSpeed = isTouchDevice ? 0.45 : 0.7;
@@ -258,6 +267,15 @@ function init() {
   }
 
   dialogClose?.addEventListener('click', () => dialog.close());
+  dialogBack?.addEventListener('click', () => dialog.close());
+
+  // Click on the backdrop (outside the dialog box) to close. The dialog
+  // element itself receives the event with target===dialog when the click
+  // lands on the backdrop pseudo-element.
+  dialog?.addEventListener('click', (ev) => {
+    if (ev.target === dialog) dialog.close();
+  });
+
   dialog?.addEventListener('close', closeSection);
   dialog?.addEventListener('cancel', closeSection); // Esc
 
@@ -305,7 +323,10 @@ function init() {
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      const a = window.innerWidth / window.innerHeight;
+      camera.aspect = a;
+      // Re-apply aspect-based FOV so portrait/landscape both look right.
+      camera.fov = a < 1.0 ? 70 : a < 1.35 ? 62 : 55;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       composer?.setSize(window.innerWidth, window.innerHeight);
