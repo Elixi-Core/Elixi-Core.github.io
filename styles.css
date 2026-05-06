@@ -393,9 +393,6 @@ code {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  /* Use dvh on supporting browsers — accounts for the iOS URL bar
-     so the canvas always fills the *visible* viewport on mobile. */
-  height: 100dvh;
   z-index: 0;
   display: block;
   /* Stop touch gestures from triggering browser pinch-zoom on phones. */
@@ -408,7 +405,6 @@ code {
 body.scene-active {
   overflow: hidden;
   height: 100vh;
-  height: 100dvh;
 }
 body.scene-active main,
 body.scene-active .nav,
@@ -506,10 +502,7 @@ body:not(.scene-active) #scene-loading {
   50%      { transform: translateY(-3px); opacity: 1; }
 }
 
-/* Section dialog — populated from cloned semantic HTML.
-   The dialog is a flex column: a sticky header (with the Back button) +
-   a scrolling body. The Back button stays reachable no matter how long
-   the content gets. */
+/* Section dialog — populated from cloned semantic HTML. */
 #section-dialog {
   position: fixed;
   top: 50%; left: 50%;
@@ -518,9 +511,7 @@ body:not(.scene-active) #scene-loading {
   margin: 0;
   width: min(820px, 92vw);
   max-height: 86vh;
-  max-height: 86dvh;
-  /* Hard cap by min() so we always leave room for the close action. */
-  padding: 0;
+  padding: 28px 32px 24px;
   background: rgba(8, 12, 16, 0.96);
   color: #e8f6ff;
   border: 1px solid rgba(0, 255, 208, 0.55);
@@ -529,66 +520,25 @@ body:not(.scene-active) #scene-loading {
     0 0 0 1px rgba(0, 255, 208, 0.18),
     0 30px 80px rgba(0, 0, 0, 0.85),
     0 0 60px rgba(0, 255, 208, 0.12);
-  overflow: hidden;       /* let the body scroll, header stays put */
+  overflow: auto;
   font-family: var(--font-sans);
   z-index: 20;
-  display: flex;
-  flex-direction: column;
 }
-#section-dialog[open] { display: flex; }
 #section-dialog::backdrop {
   background: radial-gradient(circle at center, rgba(0, 18, 24, 0.55), rgba(0, 0, 0, 0.85));
   backdrop-filter: blur(2px);
 }
-
-/* Sticky header inside the dialog — Back button on the left,
-   section title in the middle, × on the right. */
-#section-dialog .dialog-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 14px 12px 14px;
-  border-bottom: 1px solid rgba(0, 255, 208, 0.18);
-  background: rgba(2, 6, 10, 0.92);
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-#section-dialog .dialog-back {
-  background: rgba(0, 255, 208, 0.08);
-  color: #00ffd0;
-  border: 1px solid rgba(0, 255, 208, 0.55);
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-}
-#section-dialog .dialog-back:hover,
-#section-dialog .dialog-back:focus-visible {
-  background: rgba(0, 255, 208, 0.18);
-  color: #d8fffa;
-  outline: none;
-  border-color: #00ffd0;
-}
 #section-dialog h2 {
-  flex: 1;
-  margin: 0;
+  margin: 0 0 16px;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 18px;
   letter-spacing: 0.18em;
-  color: #b9f5e8;
-  text-shadow: 0 0 12px rgba(0, 255, 208, 0.35);
-  text-align: center;
-  /* Hide overflow on small screens so the title doesn't push the buttons off-screen. */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: #00ffd0;
+  text-shadow: 0 0 16px rgba(0, 255, 208, 0.4);
 }
 #section-dialog .dialog-close {
+  position: absolute;
+  top: 8px; right: 12px;
   width: 36px; height: 36px;
   background: transparent;
   color: #b9f5e8;
@@ -597,20 +547,12 @@ body:not(.scene-active) #scene-loading {
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  flex-shrink: 0;
 }
 #section-dialog .dialog-close:hover {
   border-color: rgba(0, 255, 208, 0.5);
   color: #00ffd0;
 }
-#section-dialog #dialog-body {
-  color: #d6e6ec;
-  padding: 18px 24px 22px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  /* The dialog itself is hidden-overflow; the body scrolls. */
-  min-height: 0;
-}
+#section-dialog #dialog-body { color: #d6e6ec; }
 #section-dialog #dialog-body .card {
   background: rgba(20, 26, 48, 0.6);
   border: 1px solid rgba(0, 255, 208, 0.18);
@@ -647,29 +589,13 @@ body:not(.scene-active) #scene-loading {
   font-size: 0.9em;
 }
 
-/* Mobile dialog tightening — thumb-reachable, full-bleed. Use 100dvh so we
-   account for the iOS URL bar + Android nav bar collapsing in/out. */
+/* Mobile dialog tightening — thumb-reachable, full-bleed. */
 @media (max-width: 768px) {
   #section-dialog {
     width: 96vw;
-    max-height: 92vh;
-    max-height: 92dvh;
+    max-height: 90vh;
+    padding: 20px 16px 16px;
     font-size: 15px;
-  }
-  #section-dialog .dialog-header {
-    padding: 10px 10px 9px 10px;
-    gap: 8px;
-  }
-  #section-dialog .dialog-back {
-    font-size: 12px;
-    padding: 7px 10px;
-  }
-  #section-dialog h2 {
-    font-size: 12px;
-    letter-spacing: 0.12em;
-  }
-  #section-dialog #dialog-body {
-    padding: 14px 14px 18px;
   }
   #skip-3d { font-size: 12px; padding: 7px 10px; top: 12px; right: 12px; }
   #scene-hint { font-size: 11px; top: 48px; right: 12px; }
