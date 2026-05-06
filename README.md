@@ -9,9 +9,37 @@ Personal portfolio site for **Caesar Funches** — aspiring SOC Analyst, Compute
 
 ## Stack
 
-- Plain HTML, CSS, and a tiny vanilla JS file. No build step. No `node_modules`.
+- Plain HTML, CSS, and vanilla JS. No build step. No `node_modules`.
+- Three.js (loaded via CDN importmap) drives the interactive 3D **Cyber-Ops Command Center** layered over the semantic page. See "3D scene" below.
 - One page (`index.html`) split into anchored sections, sticky nav, mobile hamburger.
 - Hosted on **GitHub Pages** straight from `main` branch root.
+
+## 3D scene
+
+The site loads as a navigable 3D command center: a dark room with CRT-style monitors on the walls, each representing one section. Click or tap a monitor to open that section's content as an overlay. Touch and mouse both work; an FPS probe automatically downgrades quality on low-end devices.
+
+The flat semantic HTML stays in `<main>` exactly as before — that's what search engines, screen readers, reader-mode, and the **Skip 3D** button (top-right) all see. Progressive enhancement: if WebGL is unavailable, the canvas is removed and the original portfolio renders.
+
+Files:
+
+- `scene.js` — Three.js scene, monitor factory, raycaster, dialog opener (~500 lines, ESM, CDN-loaded `three`)
+- `styles.css` — appended `#scene` / `#section-dialog` / `#skip-3d` styles below the original design system
+- `index.html` — adds `<canvas id="scene">`, `<dialog id="section-dialog">`, and an importmap pointing at `unpkg.com/three`
+
+The 10 monitors map to the 10 sections in `<main>`:
+
+| Monitor | Section id |
+|---|---|
+| 01 ABOUT | `#about` |
+| 02 EDUCATION | `#education` |
+| 03 SKILLS | `#skills` |
+| 04 PROJECTS | `#projects` |
+| 05 COMPETITIONS | `#competitions` |
+| 06 EXPERIENCE | `#experience` |
+| 07 REFLECTIONS | `#reflections` |
+| 08 CERTIFICATIONS | `#certifications` |
+| 09 DOCUMENTS | `#documents` |
+| 10 CONTACT | `#contact` |
 
 ## Local preview
 
@@ -72,6 +100,7 @@ Drop new files into `/assets/`:
 ├── index.html
 ├── styles.css
 ├── script.js
+├── scene.js                    (3D cyber-ops command center)
 ├── assets/
 │   ├── favicon.svg
 │   ├── photo.jpg               (placeholder — add your headshot)
