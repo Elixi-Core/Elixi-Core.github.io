@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/* Tailwind v4 — CSS-first theme. Mirrors the OKLCH palette + neutrals + teal
+   accents from the inspiration site, plus our typography stack. */
+@theme {
+  --font-display: "Red Hat Display", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-teal-300: oklch(85% 0.12 182);
+  --color-teal-400: oklch(77.7% 0.152 181.912);
+  --color-teal-500: oklch(70.4% 0.14 182.503);
+  --color-teal-600: oklch(60% 0.13 182);
+
+  --color-neutral-50:  oklch(98.5% 0 0);
+  --color-neutral-100: oklch(97% 0 0);
+  --color-neutral-200: oklch(92.2% 0 0);
+  --color-neutral-300: oklch(87% 0 0);
+  --color-neutral-400: oklch(70.8% 0 0);
+  --color-neutral-500: oklch(55.6% 0 0);
+  --color-neutral-600: oklch(43.9% 0 0);
+  --color-neutral-700: oklch(37.1% 0 0);
+  --color-neutral-800: oklch(26.9% 0 0);
+  --color-neutral-900: oklch(20.5% 0 0);
+  --color-neutral-950: #0a0a0a;
+
+  --color-magenta-400: oklch(72% 0.22 340);
+  --color-magenta-500: oklch(64% 0.24 340);
+}
+
+/* Make sure the body always sits on near-black even before React hydrates. */
+html, body, #root {
+  background: #0a0a0a;
+  color: var(--color-neutral-100);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-sans); }
+
+/* Selection color — teal so it matches the brand. */
+::selection { background: oklch(77.7% 0.152 181.912 / 0.35); color: var(--color-neutral-50); }
+
+/* Focus ring (Tailwind's focus-visible default is fine, but explicit is safer). */
+:focus-visible { outline: 2px solid var(--color-teal-400); outline-offset: 3px; border-radius: 4px; }
+
+/* Hide the canvas before r3f boots so we never flash a default white box. */
+canvas { display: block; }
+
+/* Subtle grain — applied to the body root by the App so the dark sections feel filmic. */
+.grain::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.04;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.85'/></svg>");
+  mix-blend-mode: overlay;
+}
+
+/* Reduced-motion: drop the grain animation, dim the bloom signaled to scene via JS. */
+@media (prefers-reduced-motion: reduce) {
+  .grain::before { display: none; }
+}
+
+/* Section-card pulse-border (used on certain emphasized cards). */
+@keyframes pulse-teal {
+  0%, 100% { box-shadow: 0 0 0 1px oklch(77.7% 0.152 181.912 / 0.25), 0 0 24px -6px oklch(77.7% 0.152 181.912 / 0.18); }
+  50%      { box-shadow: 0 0 0 1px oklch(77.7% 0.152 181.912 / 0.45), 0 0 36px -4px oklch(77.7% 0.152 181.912 / 0.30); }
+}
+.pulse-teal { animation: pulse-teal 4.5s ease-in-out infinite; }

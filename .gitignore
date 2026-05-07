@@ -11,3 +11,13 @@ desktop.ini
 
 # Logs
 *.log
+
+# Node / Vite
+node_modules/
+dist/
+.dist/
+build/
+.env
+.env.local
+*.local
+

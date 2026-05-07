@@ -2,84 +2,96 @@
 
 Personal portfolio site for **Caesar Funches** — aspiring SOC Analyst, Computer Systems Networking student at Houston City College, and Founder & CEO of **Elixi-Core**.
 
-**GitHub:** [github.com/Elixi-Core](https://github.com/Elixi-Core)
-**Live site:** `https://elixi-core.github.io` _(once the repo is named `Elixi-Core.github.io` and Pages is enabled)_
+**Live site:** https://elixi-core.github.io/
+**GitHub:** https://github.com/Elixi-Core
 
 ---
 
 ## Stack
 
-- Plain HTML, CSS, and a tiny vanilla JS file. No build step. No `node_modules`.
-- One page (`index.html`) split into anchored sections, sticky nav, mobile hamburger.
-- Hosted on **GitHub Pages** straight from `main` branch root.
+- **Vite + React 18** — single-page React app
+- **Tailwind v4** — CSS-first theme (`@theme` directive in `src/styles.css`)
+- **react-three-fiber + drei + @react-three/postprocessing** — cinematic 3D hero scene
+- **GitHub Actions** — auto-build + deploy to GitHub Pages on every push to `main`
+- Procedural 3D only — no `.glb` / `.fbx` model files; the hero is generated entirely in code
 
-## Local preview
+## Local development
 
-Open `index.html` directly in any browser. That's it.
-
-For an auto-reloading server (optional), if you have Python installed:
+Requires **Node 20+**.
 
 ```bash
-python -m http.server 8080
+npm install
+npm run dev      # http://localhost:5173 with HMR
+npm run build    # production build to dist/
+npm run preview  # serve dist/ at http://localhost:4173 to verify the build
 ```
 
-Then visit `http://localhost:8080`.
+## Deploying
 
-## Deploying to GitHub Pages
+Push to `main` → the GitHub Action in `.github/workflows/deploy.yml` runs `npm ci && npm run build`, uploads `dist/` as a Pages artifact, and deploys via `actions/deploy-pages@v4`.
 
-1. Create a new **public** repo under the [Elixi-Core](https://github.com/Elixi-Core) account. Recommended name: **`Elixi-Core.github.io`** (gives you the clean URL `https://elixi-core.github.io` with no subpath). Any other repo name works too — the URL just becomes `https://elixi-core.github.io/<repo>/`.
-2. From this folder:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial portfolio"
-   git branch -M main
-   git remote add origin https://github.com/Elixi-Core/Elixi-Core.github.io.git
-   git push -u origin main
-   ```
-3. GitHub repo → **Settings → Pages** → Source: **Deploy from a branch** → Branch: `main` / `(root)` → **Save**.
-4. Wait ~60 seconds, then load the URL.
+**One-time setup** (already done if Pages was previously enabled): repo → **Settings → Pages → Source: GitHub Actions**.
 
-## Updating content
+## Editing content
 
-Everything that needs to change is in `index.html`:
+Every section's content lives in [`src/data/portfolio.js`](src/data/portfolio.js). Change a project, add a certification, swap a job title — edit there, and the section components re-render with the new data.
 
-| Want to update… | Edit this section in `index.html` |
+| To update… | Edit in `src/data/portfolio.js` |
 | --- | --- |
-| Hero name, tagline, photo | `<section class="hero">` |
-| About / role-model quote | `<section id="about">` |
-| Education, coursework | `<section id="education">` |
-| Skills chips | `<section id="skills">` |
-| Projects | `<section id="projects">` |
-| Competitions | `<section id="competitions">` |
-| Experience, Elixi-Core details | `<section id="experience">` |
-| Reflections | `<section id="reflections">` |
-| Certifications | `<section id="certifications">` |
-| Document downloads | `<section id="documents">` |
-| Email / LinkedIn / GitHub | `<section id="contact">` |
+| Name, tagline, email, links, stats | `profile`, `nav` |
+| About cards | `about` |
+| Education | `education` |
+| Skills (3 columns) | `skills` |
+| Projects | `projects[]` |
+| Competitions | `competitions[]` |
+| Experience | `experience[]` |
+| Reflections | `reflections[]` |
+| Certifications | `certifications[]` |
+| Documents (résumé, etc.) | `documents[]` |
 
-Drop new files into `/assets/`:
+Drop new files into `public/assets/`:
 
-- `assets/photo.jpg` — replace placeholder with a professional headshot
-- `assets/resume.pdf` — keep résumé up to date
-- `assets/xpcyber-dangerous-drives.pdf` — verification PDF
-- `assets/recommendation-*.pdf` — recommendation letters when you receive them
+- `public/assets/resume.pdf` — keep résumé up to date
+- `public/assets/xpcyber-dangerous-drives.pdf` — XP Cyber verification PDF
+- `public/assets/recommendation-*.pdf` — recommendation letters when received
+
+## 3D hero scene
+
+The cinematic hero (`src/components/Hero3D/`) is a single Three.js scene:
+
+| File | Role |
+| --- | --- |
+| `index.jsx` | Canvas + post-processing (bloom, chromatic aberration, vignette) |
+| `HexFloor.jsx` | Procedural hex-grid floor with shader |
+| `BridgeShell.jsx` | Curved cathedral / command-bridge backdrop |
+| `CentralMonitor.jsx` | Floating monitor with name + tag |
+| `Figure.jsx` | Back-turned silhouette anchor |
+| `ParticleField.jsx` | 1200 drifting particles |
+| `CrystalAccent.jsx` | Magenta crystal cluster (warm accent corner) |
+| `Lights.jsx` | Lighting rig |
+| `CameraRig.jsx` | Slow figure-eight camera drift |
+
+The scene runs cinematically — **no mouse, touch, or scroll affects the camera.** This is deliberate: previous "interactive 3D" attempts felt glitchy and trapped content in popups. Now the 3D is purely atmospheric and the rest of the portfolio is normal scrollable HTML.
 
 ## Repo layout
 
 ```
 .
-├── index.html
-├── styles.css
-├── script.js
-├── assets/
-│   ├── favicon.svg
-│   ├── photo.jpg               (placeholder — add your headshot)
-│   ├── resume.pdf
-│   └── xpcyber-dangerous-drives.pdf
-├── .gitignore
-├── LICENSE
-└── README.md
+├── index.html                      Vite entry
+├── package.json
+├── vite.config.js
+├── .github/workflows/deploy.yml    auto-deploy on push to main
+├── public/assets/                  static files (resume.pdf, favicon, etc.)
+└── src/
+    ├── main.jsx                    React boot
+    ├── App.jsx                     page composition
+    ├── styles.css                  Tailwind + theme + global rules
+    ├── data/portfolio.js           every piece of editable copy
+    └── components/
+        ├── Nav.jsx
+        ├── Footer.jsx
+        ├── Hero3D/                 (the 3D hero, broken by responsibility)
+        └── sections/               About, Education, …, Contact
 ```
 
 ## Contact
@@ -90,4 +102,4 @@ Drop new files into `/assets/`:
 
 ## License
 
-[MIT](LICENSE) — content (résumé, project writeups, photo) belongs to Caesar Funches; the site code is free to fork as a starting template.
+[MIT](LICENSE) — content (résumé, project writeups) belongs to Caesar Funches; the site code is free to fork as a starting template.
